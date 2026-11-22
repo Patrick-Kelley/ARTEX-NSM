@@ -1,0 +1,2 @@
+alert http any any -> any any (msg:"LOCAL ARTEX replay nonce request header observed"; flow:established,to_server; http.header_names; content:"|0d 0a|X-ARTEX-Replay-Nonce|0d 0a|"; nocase; fast_pattern; classtype:misc-activity; sid:1004801; rev:1;)
+alert http any any -> any any (msg:"LOCAL ARTEX reported placeholder object requested"; flow:established,to_server; http.uri; content:"/Notexist-xyz"; fast_pattern; pcre:"/^[^?]*\/Notexist-xyz(?:\?|$)/"; classtype:misc-activity; sid:1004802; rev:1;)

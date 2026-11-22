@@ -1,0 +1,10 @@
+/zeek/
+/suricata/
+/artex-pack.rules
+/all-frameworks.rules
+/coverage.csv
+/framework-coverage.csv
+/hunt-coverage.csv
+.DS_Store
+__pycache__/
+*.log
