@@ -1,0 +1,1 @@
+alert dns any any -> any any (msg:"LOCAL DNS query for reported ARTEX campaign payload infrastructure"; flow:to_server; dns.query; pcre:"/^(?:(?:ftp|site|server)\.vietnam852\.com|(?:down|www|ftp)\.zhzy999\.net|site\.jiancai008\.com)$/i"; classtype:misc-activity; sid:1004805; rev:1;)
