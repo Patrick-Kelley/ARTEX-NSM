@@ -17,3 +17,7 @@ bash validate.sh
 The runner loads only the detection files above and checks exact notice types, signature IDs, and source addresses against the [synthetic capture](tests/local-http.pcap), including near misses and below-threshold traffic. No feed download, engine source checkout, or third-party rule pack is required. For deployment, set Zeek's local networks for your site and check Suricata SID availability.
 
 The standalone replay passed on Zeek 9.1.0-dev.656 and Suricata 9.0.0-dev. This checks the expected matches and controls in the synthetic fixture, not incident attribution or production false-positive rates.
+
+## Research credit
+
+Thanks to [ThreatDefence's agentic-attack-detections project](https://github.com/ThreatDefence/agentic-attack-detections) for documenting campaign indicators and hunting behaviors that informed this work, including the ARTEX replay-nonce header and user-agent family burst. The Zeek scripts, Suricata signatures, and synthetic replay tests in ARTEX-NSM were written for this repository.
