@@ -6,6 +6,8 @@ ARTEX-NSM is a standalone set of network detections for Zeek and Suricata. It ob
 
 ## Deploy
 
+The [November 25 Microsoft report mapping](COVERAGE.md#microsoft-threat-intelligence-november-25-2026) adds versioned default-client sightings, a source-minute path/error burst hunt, and server-scoped webhook DNS, HTTP and TLS observations. These findings are leads for investigation, not actor attribution.
+
 Load [campaign.zeek](campaign.zeek) in Zeek. Configure `Site::local_nets` and optionally `LocalNSM::monitored_servers`. Inspect `notice.log` for behaviors and `intel.log` for sightings; use JSON logs for the offline hunts. Intel matching enables hashing of visible files, so baseline CPU cost before production rollout. State for the native behavioral correlations is per worker.
 
 Load **all five** Suricata rule files: [campaign.rules](campaign.rules), [campaign-ip.rules](campaign-ip.rules), [local-http.rules](local-http.rules), [local-sni.rules](local-sni.rules), and [local-dns.rules](local-dns.rules). Set `HOME_NET` and `EXTERNAL_NET`, enable EVE alerts and check local SID allocation. Historical/shared addresses are hunt context, not a recommended blocklist.

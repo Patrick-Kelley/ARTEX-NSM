@@ -1,4 +1,4 @@
-alert http any any -> any any (msg:"LOCAL Reported ARTEX client identifier"; flow:to_server; http.user_agent; pcre:"/(?:(?i:artex-(?:worker|readonly|pentest|audit|verify|spawn|enrich)\/|scopeweaver)|ARTeX|artex-i21861-canary|Mozilla\/5\.0 \(ARTEX\)|ArtEx(?:Verify)?\/1\.0|spa-api-recon)/"; sid:1004810; rev:1;)
+alert http any any -> any any (msg:"LOCAL Reported ARTEX client identifier"; flow:to_server; http.user_agent; pcre:"/(?:(?i:^norma\/[^\s]+|artex-(?:worker|readonly|pentest|audit|verify|spawn|enrich)\/|scopeweaver)|ARTeX|artex-i21861-canary|Mozilla\/5\.0 \(ARTEX\)|ArtEx(?:Verify)?\/1\.0|spa-api-recon)/"; sid:1004810; rev:2;)
 alert http any any -> any any (msg:"LOCAL Reported placeholder URI"; flow:to_server; http.uri; pcre:"/zzz(?:-nonexistent-xyz123|_nonexistent_abc\.txt)/"; sid:1004811; rev:1;)
 alert http any any -> any any (msg:"LOCAL Reported callback parameter pair"; flow:to_server; http.uri; content:"code=AAAA&state=notvalidb64!!"; sid:1004812; rev:1;)
 alert http any any -> any any (msg:"LOCAL Unsigned token header marker in URI"; flow:to_server; http.uri; content:"eyJhbGciOiJub25lIn0."; sid:1004813; rev:1;)

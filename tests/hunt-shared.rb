@@ -24,3 +24,6 @@ verify.call('http',spread,['distributed_web_probing'])
 verify.call('http',spread.first(49),[])
 verify.call('http',spread*11,[])
 puts 'PASS: shared web, DNS, TLS and flow hunt controls'
+{'dns'=>['query','callback_service_query'],'ssl'=>['server_name','webhook_service_sni'],'http'=>['host','webhook_service_http']}.each do |kind,(field,hunt)|
+  verify.call(kind,[{'id.orig_h'=>'10.1.0.1',field=>'One.Webhook.Site'}, {'id.orig_h'=>'10.1.0.2',field=>'webhook.site.example.org'}, {'id.orig_h'=>'192.0.2.2',field=>'webhook.site'}],[hunt])
+end

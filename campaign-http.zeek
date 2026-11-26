@@ -30,7 +30,7 @@ event http_header(c: connection, is_orig: bool, name: string, value: string)
     if ( ! is_orig ) return;
     if ( name == "X-ARTX-KEY" ) http_sighting(c, "key header");
     if ( name == "AUTHORIZATION" && unsigned_marker in value ) http_sighting(c, "token marker in authorization");
-    if ( name == "USER-AGENT" && (/artex-(worker|readonly|pentest|audit|verify|spawn|enrich)\/|scopeweaver/ in to_lower(value) || /ARTeX|artex-i21861-canary|Mozilla\/5\.0 \(ARTEX\)|ArtExVerify\/|ArtEx\/1\.0|spa-api-recon/ in value) )
+    if ( name == "USER-AGENT" && (/^norma\/[^[:space:]]+|artex-(worker|readonly|pentest|audit|verify|spawn|enrich)\/|scopeweaver/ in to_lower(value) || /ARTeX|artex-i21861-canary|Mozilla\/5\.0 \(ARTEX\)|ArtExVerify\/|ArtEx\/1\.0|spa-api-recon/ in value) )
         http_sighting(c, "client identifier");
     }
 

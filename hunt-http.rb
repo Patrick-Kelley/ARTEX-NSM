@@ -3,23 +3,32 @@ require 'ipaddr'
 require 'set'
 
 module HTTPHunts
-  CLIENTS = [ /\Anorma\/0\.4\z/, /\AGo-http-client\/1\.1\z/, /spa-api-recon/i, /\Asqlmap\/1\.9/, /Fuzz Faster U Fool/, /Nmap Scripting Engine/, /HeadlessChrome/, /\Acurl\/7\.88\.1\z/, /\AWget\/1\.21\.3\z/, /\A(?:python-requests\/|Python-urllib\/3\.12)/ ].freeze
+  READER = /\Anorma\/\S+/i
+  ENRICH = /\Aartex-enrich\/\S+/i
+  CLIENTS = [ READER, /\AGo-http-client\/1\.1\z/, ENRICH, /spa-api-recon/i, /\Asqlmap\/1\.9/, /Fuzz Faster U Fool/, /Nmap Scripting Engine/, /HeadlessChrome/, /\Acurl\/7\.88\.1\z/, /\AWget\/1\.21\.3\z/, /\A(?:python-requests\/|Python-urllib\/3\.12)/ ].freeze
   STATIC = /\.(?:m?js|css|map|png|jpe?g|gif|svg|webp|ico|woff2?|ttf|eot|otf|avif|mp4|webm)(?:\?|$)/i
 
   def self.run(records, local_nets)
     readers = {}
     clients = Hash.new { |table, key| table[key] = Set.new }
     rates = Hash.new { |table, key| table[key] = Hash.new(0) }
+    bursts = {}
     records.each do |record|
       source = record['id.orig_h']
       host = (record['host'] || record['id.resp_h']).to_s.downcase
       next unless source && !host.empty? && record['ts'] && record['method']
       stamp = record['ts'].to_f
       agent = record['user_agent'].to_s
+      minute = stamp.to_i / 60 * 60
+      burst = bursts[[source, minute]] ||= [Set.new, 0, 0]
+      path = record['uri'].to_s.split('?', 2).first
+      burst[0].add(path) if path && !path.empty? && burst[0].size < 100
+      burst[1] += 1 if record['status_code'].to_s.match?(/\A4\d\d\z/)
+      burst[2] += 1 if READER.match?(agent) || ENRICH.match?(agent)
       key = [source, host]
-      if agent == 'norma/0.4' || (agent == 'Go-http-client/1.1' && record['method'] == 'GET')
+      if READER.match?(agent) || ((ENRICH.match?(agent) || agent == 'Go-http-client/1.1') && record['method'] == 'GET')
         state = readers[key] ||= {}
-        if agent == 'norma/0.4'
+        if READER.match?(agent)
           state[:invalid] = true if record['method'] != 'GET' || record['uri'].to_s.split('?', 2).first.to_s.match?(STATIC)
           state[:reader] = [state[:reader] || stamp, stamp].min
         else
@@ -31,6 +40,10 @@ module HTTPHunts
         clients[[source, stamp.to_i / 3600]].add(family)
       end
       rates[[source, host, stamp.to_i / 600]][stamp.to_i] += 1
+    end
+    bursts.each do |(source, minute), (paths, errors, defaults)|
+      yield({hunt: 'reported_default_client', source: source, minute: minute, requests: defaults}) if defaults > 0
+      yield({hunt: 'distinct_paths_and_client_errors', source: source, minute: minute, distinct_paths_at_least: 100, client_errors: errors}) if paths.size == 100 && errors >= 50
     end
     readers.each do |(source, host), state|
       next if !state[:reader] || state[:invalid]

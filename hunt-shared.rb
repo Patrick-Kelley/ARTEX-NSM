@@ -29,6 +29,9 @@ module SharedHunts
       when 'dns','ssl'
         next unless servers.any? { |net| net.include?(source) }
         name = rec[kind=='dns' ? 'query' : 'server_name'].to_s.downcase.chomp('.')
+        if name == 'webhook.site' || name.end_with?('.webhook.site')
+          report.call(kind=='dns' ? 'callback_service_query' : 'webhook_service_sni',source,name,hour)
+        end
         if kind=='dns' && OOB.any? { |zone| name.end_with?(".#{zone}") }
           report.call('callback_service_query',source,name,hour)
         elsif kind=='ssl' && allowed.none? { |net| net.include?(source) } && MODELS.any? { |zone| name==zone || name.end_with?(".#{zone}") }
@@ -40,6 +43,10 @@ module SharedHunts
         end
       when 'http'
         host = (rec['host'] || dest).downcase
+        hostname = host.sub(/:\d+\z/,'').chomp('.')
+        if (hostname == 'webhook.site' || hostname.end_with?('.webhook.site')) && servers.any? { |net| net.include?(source) }
+          report.call('webhook_service_http',source,hostname,hour)
+        end
         path = rec['uri'].to_s.split('?',2).first.to_s
         agent = rec['user_agent'].to_s
         report.call('reader_client_identifier',source,host,hour) if READER.match?(agent)
